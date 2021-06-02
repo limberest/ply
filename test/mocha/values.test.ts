@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Logger, LogLevel } from '../../src/logger';
 import { Config } from '../../src/options';
-import { Values } from '../../src/values';
+import { Values, fromXlsx, fromCsv } from '../../src/values';
 
 describe('Values', () => {
 
@@ -52,6 +52,22 @@ describe('Values', () => {
         assert.strictEqual(values.year, 1931);
         assert.strictEqual(values.rating, 1);
         assert.strictEqual(values.query, 'year=1935&rating=>4&sort=rating&descending=true');
+
+    });
+
+    it('should read from xlsx', async() => {
+
+        const rows = await fromXlsx('test/ply/values/movies.xlsx');
+
+        console.log("HERE: " + rows);
+
+    });
+
+    it('should process csv', async () => {
+
+        const rows = await fromCsv('test/ply/values/movies.csv');
+
+        console.log("HERE: " + JSON.stringify(rows, null, 2));
 
     });
 });

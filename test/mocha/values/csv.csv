@@ -1,0 +1,2 @@
+str,num,bool,strs[0],strs[1],obj.sub1.sub2.str,obj.sub1.strs[0],obj.sub1.strs[1],obj.sub1.objs[0].str,obj.sub1.objs[0].num,obj.sub1.sub2.obj.str
+str1,1,false,strs0,strs1,objSub1Sub2Str,objSub1Strs0,obj.sub1.strs[0],objSub1Objs0Str,123,objSub1Sub2ObjStr

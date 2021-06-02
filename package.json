@@ -48,6 +48,7 @@
   "homepage": "https://github.com/ply-ct/ply#readme",
   "dependencies": {
     "cross-fetch": "^3.1.4",
+    "csv-parse": "^4.15.4",
     "deepmerge": "^4.2.2",
     "diff-match-patch": "^1.0.5",
     "find-up": "^4.1.0",
@@ -59,6 +60,7 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^1.0.4",
     "os-locale": "^5.0.0",
+    "read-excel-file": "^5.1.0",
     "stacktracey": "^1.2.127",
     "ts-node": "^9.1.1",
     "yargs": "^15.4.1"

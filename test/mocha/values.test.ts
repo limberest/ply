@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as assert from 'assert';
 import { Logger, LogLevel } from '../../src/logger';
 import { Config } from '../../src/options';
@@ -63,11 +64,12 @@ describe('Values', () => {
 
     });
 
-    it('should process csv', async () => {
-
-        const rows = await fromCsv('test/ply/values/movies.csv');
-
-        console.log("HERE: " + JSON.stringify(rows, null, 2));
-
+    it('should parse csv', async () => {
+        const rows = await fromCsv('test/mocha/values/csv.csv');
+        assert.strictEqual(rows.length, 2);
+        const row0 = JSON.parse(fs.readFileSync('test/mocha/values/csv0.json', 'utf8'));
+        assert.deepStrictEqual(rows[0], row0);
+        const row1 = JSON.parse(fs.readFileSync('test/mocha/values/csv1.json', 'utf8'));
+        assert.deepStrictEqual(rows[1], row1);
     });
 });

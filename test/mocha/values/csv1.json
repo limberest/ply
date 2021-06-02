@@ -1,0 +1,34 @@
+{
+  "str": "s1",
+  "num": 999,
+  "bool": true,
+  "strs": [
+    "s0",
+    "s1"
+  ],
+  "obj": {
+    "sub1": {
+      "sub2": {
+        "str": "objSub1Sub2S1",
+        "obj": {
+          "str": "objSub1Sub2ObjStr"
+        }
+      },
+      "strs": [
+        "objSub1Strs0",
+        "objSub1Strs1"
+      ],
+      "objs": [
+        {
+          "str": "objSub1Objs0Str",
+          "num": 123.456
+        }
+      ]
+    }
+  },
+  "empty": "",
+  "floats": [
+    3.21,
+    -6.54
+  ]
+}

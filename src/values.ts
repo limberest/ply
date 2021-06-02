@@ -90,24 +90,49 @@ export interface RowConverter {
 }
 
 export interface ConverterOptions {
-    inferPrimitiveTypes: boolean;
+    trimValues?: boolean;
+    trimLabels?: boolean;
+    inferPrimitiveTypes?: boolean;
+    blankIsNull?: boolean;
     dateFormat?: string; // TODO
 }
 
+export type ValueType = string | number | boolean | Date | null;
+
+const defaultOptions: ConverterOptions = {
+    trimValues: true,
+    trimLabels: true,
+    inferPrimitiveTypes: true,
+    blankIsNull: true
+};
+
 export class DefaultRowConverter implements RowConverter {
 
+    readonly names: string[];
+    readonly options: ConverterOptions;
+
     constructor(
-        readonly names: any[],
-        readonly options: ConverterOptions = {
-            inferPrimitiveTypes: true
-        }
-    ) { }
+        names: any[],
+        options?: ConverterOptions
+    ) {
+        this.options = deepmerge(defaultOptions, options || {});
+        this.names = names.map(name => {
+            if (this.options.trimLabels) {
+                return ('' + name).trim();
+            } else {
+                return '' + name;
+            }
+        });
+    }
+
+    splitName(name: string): string[] {
+        return name.split('.');
+    }
 
     convert(row: any[]) {
         const obj: any = {};
         for (let i = 0; i < row.length; i++) {
-            const segs = ('' + this.names[i]).split('.');
-
+            const segs = this.splitName(this.names[i]);
             let cur = obj;
             for (let j = 0; j < segs.length; j++) {
                 const seg = segs[j];
@@ -121,7 +146,14 @@ export class DefaultRowConverter implements RowConverter {
                     }
                 }
                 if (j === segs.length - 1) {
-                    cur[key] = this.getValue(row[i]);
+                    if (typeof arrIdx === 'number') {
+                        if (typeof cur[key] === 'undefined') {
+                            cur[key] = [];
+                        }
+                        cur[key][arrIdx] = this.getValue(row[i]);
+                    } else {
+                        cur[key] = this.getValue(row[i]);
+                    }
                 } else if (typeof arrIdx === 'number') {
                     if (typeof cur[key] === 'undefined') {
                         cur[key] = [];
@@ -144,14 +176,20 @@ export class DefaultRowConverter implements RowConverter {
     /**
      * TODO: Date
      */
-    getValue(val: string): string | number | boolean | Date {
-        if (typeof val === 'string' && this.options.inferPrimitiveTypes) {
-            const int = parseInt(val);
-            if (!isNaN(int)) return int;
-            const float = parseFloat(val);
-            if (!isNaN(float)) return float;
-            if (val.toLowerCase() === 'true') return true;
-            else if (val.toLowerCase() === 'false') return false;
+    getValue(str: string): ValueType {
+        let val = str;
+        if (typeof val === 'string') {
+            if (this.options.trimValues) {
+                val = val.trim();
+            }
+            if (this.options.inferPrimitiveTypes) {
+                const num = parseFloat(val);
+                if (!isNaN(num)) return num;
+                if (val.toLowerCase() === 'true') return true;
+                else if (val.toLowerCase() === 'false') return false;
+            }
+            if (this.options.blankIsNull && val === '') return null;
+            if (val === "''") return '';
         }
         return val;
     }

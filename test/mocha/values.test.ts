@@ -57,11 +57,12 @@ describe('Values', () => {
     });
 
     it('should read from xlsx', async() => {
-
-        const rows = await fromXlsx('test/ply/values/movies.xlsx');
-
-        console.log("HERE: " + rows);
-
+        const rows = await fromXlsx('test/mocha/values/xlsx.xlsx');
+        assert.strictEqual(rows.length, 2);
+        const row0 = JSON.parse(fs.readFileSync('test/mocha/values/csv0.json', 'utf8'));
+        assert.deepStrictEqual(rows[0], row0);
+        const row1 = JSON.parse(fs.readFileSync('test/mocha/values/csv1.json', 'utf8'));
+        assert.deepStrictEqual(rows[1], row1);
     });
 
     it('should parse csv', async () => {

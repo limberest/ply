@@ -10,9 +10,9 @@ import { RequestLoader } from './requests';
 import { Result } from './result';
 import { TsCompileOptions } from './compile';
 import { Logger, LogLevel } from './logger';
-import { Values } from './values';
 import * as util from './util';
 import { FlowLoader, FlowSuite } from './flows';
+import { Values } from './values';
 
 export class Ply {
 
@@ -294,6 +294,7 @@ export class Plier extends EventEmitter {
         let combined: Result[] = [];
 
         // requests
+        const requestTests = new Map<Suite<Request>, string[]>();
         for (const [loc, requestPlyee] of Plyee.requests(plyees)) {
             const tests = requestPlyee.map(plyee => {
                 if (!plyee.test) {
@@ -303,9 +304,16 @@ export class Plier extends EventEmitter {
             });
             const requestSuite = await this.ply.loadRequestSuite(loc);
             requestSuite.emitter = this;
-            const promise = requestSuite.run(tests, values, runOptions);
-            if (this.ply.options.parallel) promises.push(promise);
-            else combined = [...combined, ...(await promise) ];
+            requestTests.set(requestSuite, tests);
+        }
+        if (values.isRows) {
+            // something
+        } else {
+            for (const [requestSuite, tests] of requestTests) {
+                const promise = requestSuite.run(tests, values, runOptions);
+                if (this.ply.options.parallel) promises.push(promise);
+                else combined = [...combined, ...(await promise)];
+            }
         }
 
         // cases

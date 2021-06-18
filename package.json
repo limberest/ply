@@ -62,6 +62,7 @@
     "os-locale": "^5.0.0",
     "read-excel-file": "^5.1.0",
     "stacktracey": "^1.2.127",
+    "stream-transform": "^2.1.0",
     "ts-node": "^9.1.1",
     "yargs": "^15.4.1"
   },

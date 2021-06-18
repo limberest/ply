@@ -1,7 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as stream from 'stream';
 import * as deepmerge from 'deepmerge';
 import * as csv from 'csv-parse';
+import * as transform from 'stream-transform';
 import readXlsx from 'read-excel-file/node';
 import { Retrieval } from './retrieval';
 import { Logger } from './logger';
@@ -12,24 +14,44 @@ import { Logger } from './logger';
 const PLY_VALUES = 'PLY_VALUES';
 
 export class Values {
+
+    private rowsLoc: string | undefined;
+
     constructor(
         private readonly locations: string[],
         private readonly logger: Logger
-    ) { }
+    ) {
+        for (const loc of locations) {
+            if (loc.endsWith('.csv') || loc.endsWith('.xlsx')) {
+                if (this.rowsLoc) {
+                    throw new Error('Only one values file may be .csv or .xlsx');
+                }
+                this.rowsLoc = loc;
+            }
+        }
+    }
+
+    get isRows(): boolean {
+        return !!this.rowsLoc;
+    }
 
     async read(): Promise<any> {
         let values = {};
         for (const location of this.locations) {
-            const contents = await new Retrieval(location).read();
-            if (contents) {
-                try {
-                    const obj = JSON.parse(contents);
-                    values = deepmerge(values, obj);
-                } catch (err) {
-                    throw new Error(`Cannot parse values file: ${location} (${err.message})`);
-                }
+            if (location.endsWith('.csv') || location.endsWith('.xlsx')) {
+                this.logger.debug(`Delayed load row-wise values file" ${location}`);
             } else {
-                this.logger.debug(`Values file not found: ${path.normalize(path.resolve(location))}`);
+                const contents = await new Retrieval(location).read();
+                if (contents) {
+                    try {
+                        const obj = JSON.parse(contents);
+                        values = deepmerge(values, obj);
+                    } catch (err) {
+                        throw new Error(`Cannot parse values file: ${location} (${err.message})`);
+                    }
+                } else {
+                    this.logger.debug(`Values file not found: ${path.normalize(path.resolve(location))}`);
+                }
             }
         }
         this.logger.debug('Values (excluding PLY_VALUES env var)', values);
@@ -44,12 +66,47 @@ export class Values {
         }
         return values;
     }
+
+    async getRowStream(): Promise<stream.Readable> {
+        if (!this.rowsLoc) {
+            throw new Error('Row-wise values required for row converter');
+        }
+
+        const baseVals = await this.read() || {};
+
+        if (this.rowsLoc.endsWith('.xlsx')) {
+            const readable = new stream.Readable({ objectMode: true });
+            for (const row of await fromXlsx(this.rowsLoc)) {
+                readable.push(deepmerge(baseVals, row));
+            }
+            readable.push(null);
+            return readable;
+        } else {
+            // stream csv records
+            const parser = fs.createReadStream(this.rowsLoc)
+                .pipe(csv({ to_line: 1 }));
+            // header row
+            let converter: RowConverter;
+            for await (const row of parser) {
+                converter = new DefaultRowConverter(row);
+            }
+            const transformer = transform(async (row, cb) => {
+                cb(null, deepmerge(baseVals, converter.convert(row)));
+            });
+            return fs
+                .createReadStream(this.rowsLoc)
+                .pipe(csv({ from_line: 2 }))
+                .pipe(transformer);
+        }
+    }
 }
 
+/**
+ * Reads entire csv file into rows in memory
+ */
 export const fromCsv = async (file: string): Promise<any[]> => {
 
     const valueObjs: any[] = [];
-
     const parser = fs
         .createReadStream(file)
         .pipe(csv({
@@ -68,6 +125,9 @@ export const fromCsv = async (file: string): Promise<any[]> => {
     return valueObjs;
 };
 
+/**
+ * Reads entire xlsx file into rows in memory
+ */
 export const fromXlsx = async (file: string): Promise<any[]> => {
     const valueObjs: any[] = [];
 

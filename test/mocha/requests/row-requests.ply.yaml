@@ -1,0 +1,68 @@
+createMovie: # POST
+  url: ${baseUrl}/movies
+  method: POST
+  headers:
+    Accept: application/json
+    Content-Type: application/json
+  body: |-
+    {
+      "credits": [
+        {
+          "name": "${credits[0].name}",
+          "role": "${credits[0].role}"
+        },
+        {
+          "name": "${credits[1].name}",
+          "role": "${credits[1].role}"
+        },
+        {
+          "name": "${credits[2].name}",
+          "role": "${credits[2].role}"
+        },
+        {
+          "name": "${credits[3].name}",
+          "role": "${credits[3].role}"
+        },
+        {
+          "name": "${credits[4].name}",
+          "role": "${credits[4].role}"
+        },
+        {
+          "name": "${credits[5].name}",
+          "role": "${credits[5].role}"
+        }
+      ],
+      "description?": "${description}",
+      "poster": "${poster}",
+      "rating?": ${rating},
+      "title": "${title}",
+      "webRef": {
+        "ref": "${webRef.ref}",
+        "site": "${webRef.site}"
+      },
+      "year": ${year}
+    }
+
+updateMovie: # PATCH
+  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  method: PATCH
+  headers:
+    Accept: application/json
+    Content-Type: application/json
+  body: |-
+    {
+      "rating": 4.5
+    }
+
+retrieveMovie: # GET
+  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  method: GET
+  headers:
+    Accept: application/json
+
+deleteMovie: # DELETE
+  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  method: DELETE
+  headers:
+    Accept: application/json
+

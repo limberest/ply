@@ -50,7 +50,7 @@ export interface Options {
      */
     logLocation?: string;
     /**
-     * Files containing values JSON.
+     * Files containing values JSON (or CSV or XLSX).
      */
     valuesFiles?: string[];
     /**

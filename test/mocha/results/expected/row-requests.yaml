@@ -1,0 +1,188 @@
+createMovie:
+  request:
+    url: ${baseUrl}/movies
+    method: POST
+    headers:
+      Accept: application/json
+      Content-Type: application/json
+    body: |-
+      {
+        "credits": [
+          {
+            "name": "${credits[0].name}",
+            "role": "${credits[0].role}"
+          },
+          {
+            "name": "${credits[1].name}",
+            "role": "${credits[1].role}"
+          },
+          {
+            "name": "${credits[2].name}",
+            "role": "${credits[2].role}"
+          },
+          {
+            "name": "${credits[3].name}",
+            "role": "${credits[3].role}"
+          },
+          {
+            "name": "${credits[4].name}",
+            "role": "${credits[4].role}"
+          },
+          {
+            "name": "${credits[5].name}",
+            "role": "${credits[5].role}"
+          }
+        ],
+        "description?": "${description}",
+        "poster": "${poster}",
+        "rating?": ${rating},
+        "title": "${title}",
+        "webRef": {
+          "ref": "${webRef.ref}",
+          "site": "${webRef.site}"
+        },
+        "year": ${year}
+      }
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      content-type: application/json${~.*}  # charset is optional (regex)
+      location: ${baseUrl}/movies/${~[0-9a-f]+} # id is unknown but should be hex digits
+    body: |-
+      {
+        "credits": [
+          {
+            "name": "${credits[0].name}",
+            "role": "${credits[0].role}"
+          },
+          {
+            "name": "${credits[1].name}",
+            "role": "${credits[1].role}"
+          },
+          {
+            "name": "${credits[2].name}",
+            "role": "${credits[2].role}"
+          },
+          {
+            "name": "${credits[3].name}",
+            "role": "${credits[3].role}"
+          },
+          {
+            "name": "${credits[4].name}",
+            "role": "${credits[4].role}"
+          },
+          {
+            "name": "${credits[5].name}",
+            "role": "${credits[5].role}"
+          }
+        ],
+        "description?": "${description}",
+        "id": "${~[0-9a-f]+}",
+        "poster": "${poster}",
+        "rating?": ${rating},
+        "title": "${title}",
+        "webRef": {
+          "ref": "${webRef.ref}",
+          "site": "${webRef.site}"
+        },
+        "year": ${year}
+      }
+
+updateMovie:
+  request:
+    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    method: PATCH
+    headers:
+      Accept: application/json
+      Content-Type: application/json
+    body: |-
+      {
+        "rating": 4.5
+      }
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type: application/json${~.*}  # charset is optional (regex)
+    body: |-
+      {
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }
+
+retrieveMovie:
+  request:
+    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    method: GET
+    headers:
+      Accept: application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type: application/json${~.*}  # charset is optional (regex)
+    body: |-
+      {
+        "credits": [
+          {
+            "name": "${credits[0].name}",
+            "role": "${credits[0].role}"
+          },
+          {
+            "name": "${credits[1].name}",
+            "role": "${credits[1].role}"
+          },
+          {
+            "name": "${credits[2].name}",
+            "role": "${credits[2].role}"
+          },
+          {
+            "name": "${credits[3].name}",
+            "role": "${credits[3].role}"
+          },
+          {
+            "name": "${credits[4].name}",
+            "role": "${credits[4].role}"
+          },
+          {
+            "name": "${credits[5].name}",
+            "role": "${credits[5].role}"
+          }
+        ],
+        "description?": "${description}",
+        "id": "${createMovie.response.body.id}",
+        "poster": "${poster}",
+        "rating?": ${rating},
+        "title": "${title}",
+        "webRef": {
+          "ref": "${webRef.ref}",
+          "site": "${webRef.site}"
+        },
+        "year": ${year}
+      }
+
+deleteMovie:
+  request:
+    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    method: DELETE
+    headers:
+      Accept: application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type: application/json${~.*}  # charset is optional (regex)
+    body: |-
+      {
+        "status": {
+          "code": 200,
+          "message": "OK"
+        }
+      }

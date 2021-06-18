@@ -3,7 +3,7 @@ import { Ply, Plier } from '../../src/ply';
 import { Config } from '../../src/options';
 import { Request, PlyRequest } from '../../src/request';
 import { Storage } from '../../src/storage';
-import { Values } from '../../src/values';
+import { fromCsv, Values } from '../../src/values';
 import { MultipartForm } from '../../src/form';
 
 const values = {
@@ -265,6 +265,37 @@ value2
         assert.strictEqual(part2.name, 'field2');
         assert.strictEqual(part2.data?.toString(), 'value2');
         assert.strictEqual(part2.filename, 'example.txt');
+
+    });
+
+    it('runs tests from csv', async () => {
+        // const ply = new Ply({
+        //     ...new Config().options,
+        //     expectedLocation: 'test/mocha/results/expected',
+        //     actualLocation: 'test/mocha/results/actual',
+        //     valuesFiles: [
+        //         'test/mocha/values/movies.csv',
+        //         'test/ply/values/localhost.json'
+        //     ]
+        // });
+
+        // const suites = await ply.loadRequests('test/mocha/requests/row-requests.ply.yaml');
+        // const suite = suites[0];
+
+        // const vals = await new Values(ply.options.valuesFiles, suite.logger).read();
+
+        // const results = await suite.run(vals);
+
+//        assert.strictEqual(results[0].status, 'Passed');
+
+        // const result = await suite.run('moviesByYearAndRating', values);
+        // assert.strictEqual(result.status, 'Passed');
+        // assert.strictEqual(result.message, 'Test succeeded');
+
+
+        const rows = await fromCsv('test/mocha/values/movies.csv');
+
+        console.log(JSON.stringify(rows, null, 2));
 
     });
 });

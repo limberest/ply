@@ -85,6 +85,8 @@ export class Compare {
                     const regex = exp.replace(/\$\{~.+?}/g, (match) => {
                         return '(' + match.substr(3, match.length - 4) + ')';
                     });
+                    // TODO: this is an ugly way of handling optional fields which otherwise mess up regex match
+                    // regex = regex.replace(/\?":/g, '\\?":');
                     const match = act.match(new RegExp(regex));
                     if (match && match[0].length === act.length) {
                         diffs[i].ignored = diffs[i + 1].ignored = true;

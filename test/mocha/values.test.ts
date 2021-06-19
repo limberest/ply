@@ -77,7 +77,10 @@ describe('Values', () => {
         assert.strictEqual(rowValues[1].year, 1934);
         assert.strictEqual(rowValues[1].rating, 4);
         assert.strictEqual(rowValues[1].title, 'The Case of the Howling Dog');
-        assert.strictEqual(rowValues[1].description, null);
+        assert.strictEqual(rowValues[1].description, undefined);
+        assert.strictEqual(rowValues[1].credits.length, 6);
+        assert.strictEqual(rowValues[1].credits[0].name, 'Alan Crosland');
+        assert.strictEqual(rowValues[1].credits[0].role, 'director');
         // global value
         assert.strictEqual(rowValues[1].query, 'year=1935&rating=>4&sort=rating&descending=true');
     });

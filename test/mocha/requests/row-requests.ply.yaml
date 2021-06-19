@@ -32,9 +32,8 @@ createMovie: # POST
           "role": "${credits[5].role}"
         }
       ],
-      "description?": "${description}",
       "poster": "${poster}",
-      "rating?": ${rating},
+      "rating": ${rating},
       "title": "${title}",
       "webRef": {
         "ref": "${webRef.ref}",
@@ -44,7 +43,7 @@ createMovie: # POST
     }
 
 updateMovie: # PATCH
-  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  url: ${baseUrl}/movies/${@createMovie.response.body.id}
   method: PATCH
   headers:
     Accept: application/json
@@ -55,13 +54,13 @@ updateMovie: # PATCH
     }
 
 retrieveMovie: # GET
-  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  url: ${baseUrl}/movies/${@createMovie.response.body.id}
   method: GET
   headers:
     Accept: application/json
 
 deleteMovie: # DELETE
-  url: ${baseUrl}/movies/${createMovie.response.body.id}
+  url: ${baseUrl}/movies/${@createMovie.response.body.id}
   method: DELETE
   headers:
     Accept: application/json

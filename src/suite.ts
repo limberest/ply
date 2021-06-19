@@ -110,8 +110,7 @@ export class Suite<T extends Test> {
             }
             const results = await this.runTests([test], valuesOrRunOptions || {}, runOptions);
             return results[0];
-        }
-        else if (Array.isArray(namesOrValues)) {
+        } else if (Array.isArray(namesOrValues)) {
             const names = typeof namesOrValues === 'string' ? [namesOrValues] : namesOrValues;
             const tests = names.map(name => {
                 const test = this.get(name);
@@ -121,8 +120,7 @@ export class Suite<T extends Test> {
                 return test;
             }, this);
             return await this.runTests(tests, valuesOrRunOptions || {}, runOptions);
-        }
-        else {
+        } else {
             // run all tests
             return await this.runTests(this.all(), namesOrValues, valuesOrRunOptions);
         }
@@ -156,8 +154,7 @@ export class Suite<T extends Test> {
                 let testFile;
                 if (runOptions?.useDist && this.outFile) {
                     testFile = this.outFile;
-                }
-                else {
+                } else {
                     testFile = this.runtime.testsLocation.toString() + '/' + this.path;
                 }
                 const mod = await import(testFile);
@@ -168,16 +165,14 @@ export class Suite<T extends Test> {
                 const inst = new mod[clsName]();
                 this.runtime.decoratedSuite = new DecoratedSuite(inst);
                 this.runtime.results.actual.remove();
-            }
-            else {
+            } else {
                 // running a request suite
                 if (!this.callingFlowPath) {
                     callingCaseInfo = await this.getCallingCaseInfo(runOptions);
                     if (callingCaseInfo) {
                         this.runtime.results = callingCaseInfo.results;
                         this.logger.storage = callingCaseInfo.results.log;
-                    }
-                    else {
+                    } else {
                         this.emitSuiteStarted();
                         this.runtime.results.actual.remove();
                     }

@@ -1,4 +1,4 @@
-title,year,rating,poster,description,credits[0].name,credits[0].role,credits[1].name,credits[1].role,credits[2].name,credits[2].role,credits[3].name,credits[3].role,credits[4].name,credits[4].role,credits[5].name,credits[5].role,webRef.site,webRef.ref
-The Case of the Curious Bride,1935,3.5,cocb.jpg,,Michael Curtiz,director,Warren William,actor,Margaret Lindsay,actor,Donald Woods,actor,Claire Dodd,actor,Allen Jenkins,actor,imdb.com,tt0026184
-The Case of the Howling Dog,1934,4.0,cothd.jpg,,Alan Crosland,director,Warren William,actor,Mary Astor,actor,Allen Jenkins,actor,Grant Mitchell,actor,Helen Trenholme,actor,imdb.com,tt0024958
-The Case of the Stuttering Bishop,1937,3.5,cosb.jpg,,William Clemens,director,Donald Woods,actor,Ann Dvorak,actor,Anne Nagel,actor,Linda Perry,actor,Craig Reynolds,actor,imdb.com,tt0028695
+title,year,rating,poster,credits[0].name,credits[0].role,credits[1].name,credits[1].role,credits[2].name,credits[2].role,credits[3].name,credits[3].role,credits[4].name,credits[4].role,credits[5].name,credits[5].role,webRef.site,webRef.ref
+The Case of the Curious Bride,1935,3.5,cocb.jpg,Michael Curtiz,director,Warren William,actor,Margaret Lindsay,actor,Donald Woods,actor,Claire Dodd,actor,Allen Jenkins,actor,imdb.com,tt0026184
+The Case of the Howling Dog,1934,4.0,cothd.jpg,Alan Crosland,director,Warren William,actor,Mary Astor,actor,Allen Jenkins,actor,Grant Mitchell,actor,Helen Trenholme,actor,imdb.com,tt0024958
+The Case of the Stuttering Bishop,1937,3.5,cosb.jpg,William Clemens,director,Donald Woods,actor,Ann Dvorak,actor,Anne Nagel,actor,Linda Perry,actor,Craig Reynolds,actor,imdb.com,tt0028695

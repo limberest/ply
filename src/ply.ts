@@ -288,7 +288,8 @@ export class Plier extends EventEmitter {
     async run(plyees: string[], runOptions?: RunOptions): Promise<Result[]> {
         this.logger.debug('Options', this.ply.options);
 
-        const values = await new Values(this.ply.options.valuesFiles, this.logger).read();
+        const plyValues = new Values(this.ply.options.valuesFiles, this.logger);
+        const values = await plyValues.read();
 
         const promises: Promise<Result[]>[] = [];
         let combined: Result[] = [];
@@ -306,8 +307,15 @@ export class Plier extends EventEmitter {
             requestSuite.emitter = this;
             requestTests.set(requestSuite, tests);
         }
-        if (values.isRows) {
-            // something
+        if (plyValues.isRows) {
+            // iterate rows
+            for await (const rowVals of await plyValues.getRowStream()) {
+                for (const [requestSuite, tests] of requestTests) {
+                    const promise = requestSuite.run(tests, rowVals, runOptions);
+                    if (this.ply.options.parallel) promises.push(promise);
+                    else combined = [...combined, ...(await promise)];
+                }
+            }
         } else {
             for (const [requestSuite, tests] of requestTests) {
                 const promise = requestSuite.run(tests, values, runOptions);

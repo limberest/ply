@@ -33,9 +33,8 @@ createMovie:
             "role": "${credits[5].role}"
           }
         ],
-        "description?": "${description}",
         "poster": "${poster}",
-        "rating?": ${rating},
+        "rating": ${rating},
         "title": "${title}",
         "webRef": {
           "ref": "${webRef.ref}",
@@ -78,10 +77,9 @@ createMovie:
             "role": "${credits[5].role}"
           }
         ],
-        "description?": "${description}",
         "id": "${~[0-9a-f]+}",
         "poster": "${poster}",
-        "rating?": ${rating},
+        "rating": ${rating},
         "title": "${title}",
         "webRef": {
           "ref": "${webRef.ref}",
@@ -92,7 +90,7 @@ createMovie:
 
 updateMovie:
   request:
-    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    url: ${baseUrl}/movies/${@createMovie.response.body.id}
     method: PATCH
     headers:
       Accept: application/json
@@ -117,7 +115,7 @@ updateMovie:
 
 retrieveMovie:
   request:
-    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    url: ${baseUrl}/movies/${@createMovie.response.body.id}
     method: GET
     headers:
       Accept: application/json
@@ -155,10 +153,9 @@ retrieveMovie:
             "role": "${credits[5].role}"
           }
         ],
-        "description?": "${description}",
-        "id": "${createMovie.response.body.id}",
+        "id": "${@createMovie.response.body.id}",
         "poster": "${poster}",
-        "rating?": ${rating},
+        "rating": 4.5,
         "title": "${title}",
         "webRef": {
           "ref": "${webRef.ref}",
@@ -169,7 +166,7 @@ retrieveMovie:
 
 deleteMovie:
   request:
-    url: ${baseUrl}/movies/${createMovie.response.body.id}
+    url: ${baseUrl}/movies/${@createMovie.response.body.id}
     method: DELETE
     headers:
       Accept: application/json

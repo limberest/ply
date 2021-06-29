@@ -343,7 +343,7 @@ export class Config {
             const config = configPath ? this.read(configPath) : {};
             let spec = yargs
                 .usage('Usage: $0 <tests> [options]')
-                .help('h')
+                .help('help').alias('help', 'h')
                 .version().alias('version', 'v')
                 .config(config)
                 .option('config', { description: 'Ply config location', type: 'string', alias: 'c' });

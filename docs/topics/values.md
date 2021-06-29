@@ -53,7 +53,7 @@ only a.json and b.json will be considered (not any files designated in plyconfig
 
 Values files that are specified but not present on the file system are simply ignored and no error is thrown.
 
-## Row-Wise Values
+## Rowwise Values
 TODO: Describe csv/xlsx values.
 
 ## Environment Variable

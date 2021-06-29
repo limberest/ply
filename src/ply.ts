@@ -13,6 +13,7 @@ import { Logger, LogLevel } from './logger';
 import * as util from './util';
 import { FlowLoader, FlowSuite } from './flows';
 import { Values } from './values';
+import { PlyRunner } from './runner';
 
 export class Ply {
 
@@ -292,8 +293,9 @@ export class Plier extends EventEmitter {
         const plyValues = new Values(this.ply.options.valuesFiles, this.logger);
         const values = await plyValues.read();
 
-        const promises: Promise<Result[]>[] = [];
+        let promises: Promise<Result[]>[] = [];
         let combined: Result[] = [];
+
 
         // requests
         const requestTests = new Map<Suite<Request>, string[]>();
@@ -308,22 +310,12 @@ export class Plier extends EventEmitter {
             requestSuite.emitter = this;
             requestTests.set(requestSuite, tests);
         }
-        if (plyValues.isRows) {
-            // iterate rows
-            for await (const rowVals of await plyValues.getRowStream()) {
-                for (const [requestSuite, tests] of requestTests) {
-                    const promise = requestSuite.run(tests, rowVals, runOptions);
-                    if (this.ply.options.parallel) promises.push(promise);
-                    else combined = [...combined, ...(await promise)];
-                }
-            }
-        } else {
-            for (const [requestSuite, tests] of requestTests) {
-                const promise = requestSuite.run(tests, values, runOptions);
-                if (this.ply.options.parallel) promises.push(promise);
-                else combined = [...combined, ...(await promise)];
-            }
-        }
+
+        const requestRunner = new PlyRunner(this.ply.options, requestTests, plyValues);
+        await requestRunner.runSuiteTests(values, runOptions);
+        if (this.ply.options.parallel) promises = [ ...promises, ...requestRunner.promises ];
+        else combined = [ ...combined, ...requestRunner.results ];
+
 
         // flows
         const flowTests = new Map<FlowSuite, string[]>();
@@ -341,22 +333,12 @@ export class Plier extends EventEmitter {
                 flowTests.set(flowSuite, tests);
             }
         }
-        if (plyValues.isRows) {
-            // iterate rows
-            for await (const rowVals of await plyValues.getRowStream()) {
-                for (const [flowSuite, tests] of flowTests) {
-                    const promise = flowSuite.run(tests, rowVals, runOptions);
-                    if (this.ply.options.parallel) promises.push(promise);
-                    else combined = [...combined, ...(await promise)];
-                }
-            }
-        } else {
-            for (const [flowSuite, tests] of flowTests) {
-                const promise = flowSuite.run(tests, values, runOptions);
-                if (this.ply.options.parallel) promises.push(promise);
-                else combined = [...combined, ...(await promise)];
-            }
-        }
+
+        const flowRunner = new PlyRunner(this.ply.options, flowTests, plyValues);
+        await flowRunner.runSuiteTests(values, runOptions);
+        if (this.ply.options.parallel) promises = [...promises, ...flowRunner.promises];
+        else combined = [...combined, ...flowRunner.results];
+
 
         // cases
         const caseTests = new Map<Suite<Case>, string[]>();
@@ -374,28 +356,19 @@ export class Plier extends EventEmitter {
                 caseTests.set(caseSuite, tests);
             }
         }
-        if (plyValues.isRows) {
-            // iterate rows
-            for await (const rowVals of await plyValues.getRowStream()) {
-                for (const [caseSuite, tests] of caseTests) {
-                    const promise = caseSuite.run(tests, rowVals, runOptions);
-                    if (this.ply.options.parallel) promises.push(promise);
-                    else combined = [...combined, ...(await promise)];
-                }
-            }
-        } else {
-            for (const [caseSuite, tests] of caseTests) {
-                const promise = caseSuite.run(tests, values, runOptions);
-                if (this.ply.options.parallel) promises.push(promise);
-                else combined = [...combined, ...(await promise)];
-            }
-        }
+
+        const caseRunner = new PlyRunner(this.ply.options, caseTests, plyValues);
+        await caseRunner.runSuiteTests(values, runOptions);
+        if (this.ply.options.parallel) promises = [...promises, ...caseRunner.promises];
+        else combined = [...combined, ...caseRunner.results];
+
 
         if (this.ply.options.parallel) {
             for (const results of await Promise.all(promises)) {
                 combined = [...combined, ...results];
             }
         }
+
         return combined;
     }
 

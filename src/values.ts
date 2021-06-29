@@ -39,7 +39,7 @@ export class Values {
         let values = {};
         for (const location of this.locations) {
             if (location.endsWith('.csv') || location.endsWith('.xlsx')) {
-                this.logger.debug(`Delayed load row-wise values file" ${location}`);
+                this.logger.debug(`Delayed load rowwise values file" ${location}`);
             } else {
                 const contents = await new Retrieval(location).read();
                 if (contents) {
@@ -69,7 +69,7 @@ export class Values {
 
     async getRowStream(): Promise<stream.Readable> {
         if (!this.rowsLoc) {
-            throw new Error('Row-wise values required for row converter');
+            throw new Error('Rowwise values required for row converter');
         }
 
         const baseVals = await this.read() || {};

@@ -77,6 +77,7 @@ export class Values {
         if (this.rowsLoc.endsWith('.xlsx')) {
             const readable = new stream.Readable({ objectMode: true });
             for (const row of await fromXlsx(this.rowsLoc)) {
+                this.logger.debug('Row values', row);
                 readable.push(deepmerge(baseVals, row));
             }
             readable.push(null);
@@ -91,7 +92,9 @@ export class Values {
                 converter = new DefaultRowConverter(row);
             }
             const transformer = transform(async (row, cb) => {
-                cb(null, deepmerge(baseVals, converter.convert(row)));
+                const converted = converter.convert(row);
+                this.logger.debug('Row values', converted);
+                cb(null, deepmerge(baseVals, converted));
             });
             return fs
                 .createReadStream(this.rowsLoc)

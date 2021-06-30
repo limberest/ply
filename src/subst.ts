@@ -15,7 +15,8 @@ function get(input: string, context: object): string {
     path = path.substring(2, path.length - 1);
 
     // directly contains expression (flat obj or user-entered values in vscode)
-    if (typeof (context as any)[path] === 'string') {
+    const type = typeof (context as any)[path];
+    if (type === 'string' || type === 'number' || type === 'boolean') {
         return (context as any)[path];
     }
 

@@ -29,6 +29,7 @@ export class PlyRunner<T extends Test> {
     }
 
     async runSuiteTests(values: object, runOptions?: RunOptions) {
+        if (this.suiteTests.size === 0) return;
 
         if (this.plyValues.isRows) {
             // iterate rows
@@ -36,21 +37,14 @@ export class PlyRunner<T extends Test> {
             for await (const rowVals of await this.plyValues.getRowStream()) {
                 if (rowCount >= this.options.batchRows && this.options.batchDelay > 0) {
                     rowCount = 0;
-                    setTimeout(async () => {
-                        rowCount++;
-                        for (const [suite, tests] of this.suiteTests) {
-                            const promise = suite.run(tests, rowVals, runOptions);
-                            if (this.options.parallel) this.promises.push(promise);
-                            else this.results = [...this.results, ...(await promise)];
-                        }
-                    }, this.options.batchDelay);
-                } else {
-                    rowCount++;
-                    for (const [suite, tests] of this.suiteTests) {
-                        const promise = suite.run(tests, rowVals, runOptions);
-                        if (this.options.parallel) this.promises.push(promise);
-                        else this.results = [...this.results, ...(await promise)];
-                    }
+                    await this.delay(this.options.batchDelay);
+                }
+
+                rowCount++;
+                for (const [suite, tests] of this.suiteTests) {
+                    const promise = suite.run(tests, rowVals, runOptions);
+                    if (this.options.parallel) this.promises.push(promise);
+                    else this.results = [...this.results, ...(await promise)];
                 }
             }
         } else {
@@ -60,5 +54,11 @@ export class PlyRunner<T extends Test> {
                 else this.results = [...this.results, ...(await promise)];
             }
         }
+    }
+
+    private async delay(ms: number) {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms);
+        });
     }
 }

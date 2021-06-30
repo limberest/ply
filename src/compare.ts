@@ -82,11 +82,17 @@ export class Compare {
                 }
                 else if (exp.indexOf('${~') >= 0) {
                     // regex
-                    const regex = exp.replace(/\$\{~.+?}/g, (match) => {
+
+                    // first escape all parens (TODO: this means regexs cannot contain parens)
+                    let regex = exp.replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+                    // capture groups for expressions
+                    regex = regex.replace(/\$\{~.+?}/g, (match) => {
                         return '(' + match.substr(3, match.length - 4) + ')';
                     });
+
                     // TODO: this is an ugly way of handling optional fields which otherwise mess up regex match
                     // regex = regex.replace(/\?":/g, '\\?":');
+                    
                     const match = act.match(new RegExp(regex));
                     if (match && match[0].length === act.length) {
                         diffs[i].ignored = diffs[i + 1].ignored = true;

@@ -1,3 +1,4 @@
+import { Logger } from './logger';
 import { PlyOptions, RunOptions } from './options';
 import { Result } from './result';
 import { Suite } from './suite';
@@ -23,7 +24,8 @@ export class PlyRunner<T extends Test> {
     constructor(
         readonly options: PlyOptions,
         readonly suiteTests: Map<Suite<T>, string[]>,
-        readonly plyValues: Values
+        readonly plyValues: Values,
+        private logger: Logger
     ) {
 
     }
@@ -37,6 +39,7 @@ export class PlyRunner<T extends Test> {
             for await (const rowVals of await this.plyValues.getRowStream()) {
                 if (rowCount >= this.options.batchRows && this.options.batchDelay > 0) {
                     rowCount = 0;
+                    this.logger.info('--------------------');
                     await this.delay(this.options.batchDelay);
                 }
 

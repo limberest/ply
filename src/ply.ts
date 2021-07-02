@@ -311,7 +311,7 @@ export class Plier extends EventEmitter {
             requestTests.set(requestSuite, tests);
         }
 
-        const requestRunner = new PlyRunner(this.ply.options, requestTests, plyValues);
+        const requestRunner = new PlyRunner(this.ply.options, requestTests, plyValues, this.logger);
         await requestRunner.runSuiteTests(values, runOptions);
         if (this.ply.options.parallel) promises = [ ...promises, ...requestRunner.promises ];
         else combined = [ ...combined, ...requestRunner.results ];
@@ -334,7 +334,7 @@ export class Plier extends EventEmitter {
             }
         }
 
-        const flowRunner = new PlyRunner(this.ply.options, flowTests, plyValues);
+        const flowRunner = new PlyRunner(this.ply.options, flowTests, plyValues, this.logger);
         await flowRunner.runSuiteTests(values, runOptions);
         if (this.ply.options.parallel) promises = [...promises, ...flowRunner.promises];
         else combined = [...combined, ...flowRunner.results];
@@ -357,7 +357,7 @@ export class Plier extends EventEmitter {
             }
         }
 
-        const caseRunner = new PlyRunner(this.ply.options, caseTests, plyValues);
+        const caseRunner = new PlyRunner(this.ply.options, caseTests, plyValues, this.logger);
         await caseRunner.runSuiteTests(values, runOptions);
         if (this.ply.options.parallel) promises = [...promises, ...caseRunner.promises];
         else combined = [...combined, ...caseRunner.results];

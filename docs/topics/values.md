@@ -62,11 +62,19 @@ Values from PLY_VALUES are merged with (and take precedence over) values files d
 This enables you to keep secrets for containerized/cloud deployments in PLY_VALUES, while using the file-based method for non-secrets.
 
 ## Rowwise Values
-Ply supports [iterative test execution](iterate), which is indicated simply by including a .csv or .xlsx file among `valuesFiles`.
+Ply supports [iterative test execution](iterate), which is indicated simply by including a .csv or .xlsx file among `valuesFiles`:
+```json
+{
+  "valuesFiles": [
+    "test/values/localhost.json",
+    "test/values/movies.csv"
+  ]
+}
+```
 Only one .csv/.xlsx file may be included. Ply will repeatedly run each test for every row in the dataset. Same-named values from .csv/xlsx rows
 always take precedence over those from .json files.
 
-See [iterating](iterate#syntax) for details on the syntax for rowwise values.
+See [Iterating](iterate#syntax) for details on rowwise values syntax.
 
 ## Runtime Values
 As discussed previously under [Results](results#runtime-values), values are automatically supplemented with request/response objects from previous requests

@@ -27,6 +27,9 @@ topics:
       - label: Values
         nav: values
         tags: parameter, dynamic, properties, json, file
+      - label: Iterating
+        nav: iterate
+        tags: load, performance, repeat
       - label: Cases
         nav: cases
         tags: typescript, decorator, before, after, test, suite, @test, @suite, movieCrud, chai, programmatic, code, debug, skipped

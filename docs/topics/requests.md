@@ -39,8 +39,8 @@ Before we move on to show how you can run your Ply request suites, a few points 
   - Suites are identified by their YAML file name, so there's always one suite per file
   - Suites should be self contained; expressions cannot reference runtime values from a different suite
   - During execution:
-    - suites are run in parallel 
-    - but within a suite each request is run sequentially, in order
+    - suites can be run in parallel by specifying the `parallel` [config option](config) 
+    - but within a suite requests are always run sequentially, in declaration order
 
 ## Running
 Requests can be run via [Ply CLI](cli), or within Visual Studio Code by installing the [Ply Extension]().

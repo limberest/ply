@@ -7,7 +7,7 @@ import { Runtime } from './runtime';
 import { Options, RunOptions } from './options';
 import { PlyResult } from './result';
 import { MultipartForm } from './form';
-import { timestamp, header } from './util';
+import * as util from './util';
 import * as subst from './subst';
 
 export interface Request extends Test {
@@ -29,6 +29,7 @@ export class PlyRequest implements Request, PlyTest {
     readonly end?: number;
     submitted?: Date;
     graphQl?: string; // retain substituted but unjsonified query
+    id: string;
 
     /**
      * @param name test name
@@ -47,6 +48,7 @@ export class PlyRequest implements Request, PlyTest {
         this.body = obj.body;
         this.start = obj.start || 0;
         this.end = obj.end;
+        this.id = util.genId();
     }
 
     getSupportedMethod(method: string): string | undefined {
@@ -86,9 +88,9 @@ export class PlyRequest implements Request, PlyTest {
 
         const before = new Date().getTime();
         const { Authorization: _auth, ...loggedHeaders } = requestObj.headers;
-        this.logger.log(logLevel, 'Request', { ...requestObj, headers: loggedHeaders });
+        this.logger.log(logLevel, 'Request', { id: this.id, ...requestObj, headers: loggedHeaders });
 
-        const ctHeader = header(requestObj.headers, 'content-type');
+        const ctHeader = util.header(requestObj.headers, 'content-type');
         if (ctHeader && ctHeader[1].startsWith('multipart/form-data')) {
             requestObj = new MultipartForm(requestObj).getRequest();
         }
@@ -99,7 +101,7 @@ export class PlyRequest implements Request, PlyTest {
         const headers = this.responseHeaders(response.headers);
         const body = await response.text();
         const time = new Date().getTime() - before;
-        const plyResponse = new PlyResponse(status, headers, body, time);
+        const plyResponse = new PlyResponse(this.id, status, headers, body, time);
         this.logger.log(logLevel, 'Response', plyResponse);
         return plyResponse;
     }
@@ -163,7 +165,8 @@ export class PlyRequest implements Request, PlyTest {
     async run(runtime: Runtime, values: object, runOptions?: RunOptions): Promise<PlyResult> {
         this.submitted = new Date();
         const requestObject = this.getRequest(values, runtime.options, true);
-        this.logger.info(`Request '${this.name}' submitted at ${timestamp(this.submitted, this.logger.level === LogLevel.debug)}`);
+        const id = this.logger.level === LogLevel.debug ? ` (${this.id})` : '';
+        this.logger.info(`Request '${this.name}'${id} submitted at ${util.timestamp(this.submitted, this.logger.level === LogLevel.debug)}`);
         const runOpts: RunOptions = { ...runOptions };
         const expectedExists = await runtime.results.expected.exists;
         if (runOptions?.submitIfExpectedMissing && !expectedExists) {
@@ -180,7 +183,7 @@ export class PlyRequest implements Request, PlyTest {
         const result = new PlyResult(
             this.name,
             requestObject,
-            response.getResponse(runtime.options, runtime.responseHeaders, true)
+            response.getResponse(this.id, runtime.options, runtime.responseHeaders, true)
         );
         if (this.graphQl) {
             result.graphQl = this.graphQl;

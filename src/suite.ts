@@ -4,7 +4,7 @@ import { TestType, Test, PlyTest } from './test';
 import { Result, Outcome, Verifier, PlyResult, ResultPaths } from './result';
 import { Location } from './location';
 import { Storage } from './storage';
-import { Logger } from './logger';
+import { Logger, LogLevel } from './logger';
 import { Runtime, DecoratedSuite, CallingCaseInfo } from './runtime';
 import { RunOptions } from './options';
 import { SUITE, TEST, RESULTS } from './names';
@@ -419,18 +419,19 @@ export class Suite<T extends Test> {
         outcome.end = Date.now();
         const ms = outcome.start ? ` in ${outcome.end - outcome.start} ms` : '';
         const testLabel = label || test.type.charAt(0).toLocaleUpperCase() + test.type.substring(1);
+        const id = this.logger.level === LogLevel.debug && (test as any).id ? ` (${(test as any).id})` : '';
         if (outcome.status === 'Passed') {
-            this.logger.info(`${testLabel} '${test.name}' PASSED${ms}`);
+            this.logger.info(`${testLabel} '${test.name}'${id} PASSED${ms}`);
         }
         else if (outcome.status === 'Failed') {
             const diff = outcome.diff ? '\n' + outcome.diff : '';
-            this.logger.error(`${testLabel} '${test.name}' FAILED${ms}: ${outcome.message}${diff}`);
+            this.logger.error(`${testLabel} '${test.name}'${id} FAILED${ms}: ${outcome.message}${diff}`);
         }
         else if (outcome.status === 'Errored') {
-            this.logger.error(`${testLabel} '${test.name}' ERRORED${ms}: ${outcome.message}`);
+            this.logger.error(`${testLabel} '${test.name}'${id} ERRORED${ms}: ${outcome.message}`);
         }
         else if (outcome.status === 'Submitted') {
-            this.logger.info(`${testLabel} '${test.name}' SUBMITTED${ms}`);
+            this.logger.info(`${testLabel} '${test.name}'${id} SUBMITTED${ms}`);
         }
         if (this.emitter) {
             this.emitter.emit('outcome', {
@@ -490,7 +491,7 @@ export class Suite<T extends Test> {
         if (result.graphQl) {
             leanRequest.body = result.graphQl;  // restore graphQl for better comparisons
         }
-        const { time: _time, ...leanResponse } = result.response;
+        const { requestId: _requestId, time: _time, ...leanResponse } = result.response;
 
         let invocationObject = {
             [result.name]: {

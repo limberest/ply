@@ -1,3 +1,4 @@
+import * as process from 'process';
 import * as osLocale from 'os-locale';
 
 export function locale() {
@@ -15,6 +16,18 @@ export function timestamp(date: Date, withTimeZone = false): string {
     const millis = String(date.getMilliseconds()).padStart(3, '0');
     const tz = withTimeZone ? date.toTimeString().substring(date.toTimeString().indexOf(' ')) : '';
     return `${date.toLocaleString(locale(), { hour12: false })}:${millis}${tz}`;
+}
+
+/**
+ * time in nanoseconds
+ */
+export function nanoTime(): number {
+    const hrTime = process.hrtime();
+    return hrTime[0] * 1000000000 + hrTime[1];
+}
+
+export function genId(): string {
+    return nanoTime().toString(16);
 }
 
 /**
@@ -74,11 +87,6 @@ export function lineComment(line: string, token = '#'): string | undefined {
  */
 export function fwdSlashes(path: string): string {
     return path.replace(/\\/g, '/');
-}
-
-export function genId(): string {
-    // TODO: consider microseconds or nanoseconds (process.hrtime())
-    return Date.now().toString(16);
 }
 
 export function header(headers: { [key: string]: string }, name: string): [string, string] | undefined {

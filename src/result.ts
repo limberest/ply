@@ -80,7 +80,7 @@ export class PlyResult implements Result {
             status: this.status,
             message: this.message,
             request: this.request,
-            response: this.response?.getResponse(options)
+            response: this.response?.getResponse(this.response.requestId, options)
         };
     }
 

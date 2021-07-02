@@ -1,6 +1,6 @@
 import * as minimatch from 'minimatch';
 import * as flowbee from 'flowbee';
-import { Logger } from './logger';
+import { Logger, LogLevel } from './logger';
 import { RunOptions } from './options';
 import { Runtime } from './runtime';
 import { PlyStep } from './step';
@@ -9,6 +9,7 @@ import { Request } from './request';
 import * as util from './util';
 import { Step } from 'flowbee';
 import { Result } from './result';
+import { RUN_ID } from './names';
 
 export interface Flow {
     flow: flowbee.Flow;
@@ -82,6 +83,9 @@ export class PlyFlow implements Flow {
      * Run a ply flow.
      */
     async run(runtime: Runtime, values: object, runOptions?: RunOptions): Promise<Result> {
+
+        (values as any)[RUN_ID] = this.instance.runId || util.genId();
+
         if (this.flow.attributes?.values) {
             const rows = JSON.parse(this.flow.attributes?.values);
             for (const row of rows) {
@@ -108,7 +112,8 @@ export class PlyFlow implements Flow {
             runOptions.createExpected = true;
         }
 
-        this.logger.info(`Running flow '${this.name}'`);
+        const runId = this.logger.level === LogLevel.debug ? ` (${this.instance.runId})` : '';
+        this.logger.info(`Running flow '${this.name}'${runId}`);
         this.instance.status = 'In Progress';
         this.instance.values = values as flowbee.Values;
         this.instance.start = new Date();
@@ -155,7 +160,7 @@ export class PlyFlow implements Flow {
             return;
         }
 
-        const plyStep = new PlyStep(step, this.requestSuite, this.logger, this.instance.id, this.flow.path, subflow?.subflow);
+        const plyStep = new PlyStep(step, this.requestSuite, this.logger, this.flow.path, this.instance.id, subflow?.subflow);
         if (subflow) {
             if (!subflow.instance.stepInstances) {
                 subflow.instance.stepInstances = [];

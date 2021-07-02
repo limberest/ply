@@ -16,7 +16,7 @@ export interface Response {
 export class PlyResponse implements Response {
 
     constructor(
-        readonly requestId: string,
+        readonly runId: string,
         readonly status: Status,
         readonly headers: {[key: string]: string},
         readonly body?: any,
@@ -30,7 +30,7 @@ export class PlyResponse implements Response {
      * @param wantedHeaders optional name of headers subset to keep
      * @param stringBody body object is stringified
      */
-    getResponse(requestId: string, options: Options, wantedHeaders?: string[], stringBody = false): PlyResponse {
+    getResponse(runId: string, options: Options, wantedHeaders?: string[], stringBody = false): PlyResponse {
 
         const headers: any = {};
         const headerNames = wantedHeaders || Object.keys(this.headers);
@@ -56,7 +56,7 @@ export class PlyResponse implements Response {
         }
 
         return new PlyResponse(
-            requestId,
+            runId,
             this.status,
             headers,
             body,

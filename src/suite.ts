@@ -7,7 +7,7 @@ import { Storage } from './storage';
 import { Logger, LogLevel } from './logger';
 import { Runtime, DecoratedSuite, CallingCaseInfo } from './runtime';
 import { RunOptions } from './options';
-import { SUITE, TEST, RESULTS } from './names';
+import { SUITE, TEST, RESULTS, RUN_ID } from './names';
 import { Retrieval } from './retrieval';
 import { EventEmitter } from 'events';
 import { Plyee } from './ply';
@@ -142,6 +142,10 @@ export class Suite<T extends Test> {
 
         // runtime values are a deep copy of passed values
         const runValues = this.callingFlowPath ? values : JSON.parse(JSON.stringify(values));
+        // runId unique per suite exec (already populated for flow requests)
+        if (!runValues[RUN_ID]) {
+            runValues[RUN_ID] = util.genId();
+        }
         this.runtime.responseHeaders = undefined;
 
         let callingCaseInfo: CallingCaseInfo | undefined;
@@ -491,7 +495,7 @@ export class Suite<T extends Test> {
         if (result.graphQl) {
             leanRequest.body = result.graphQl;  // restore graphQl for better comparisons
         }
-        const { requestId: _requestId, time: _time, ...leanResponse } = result.response;
+        const { runId: _requestId, time: _time, ...leanResponse } = result.response;
 
         let invocationObject = {
             [result.name]: {

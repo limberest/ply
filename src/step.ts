@@ -1,5 +1,5 @@
 import * as flowbee from 'flowbee';
-import { Logger } from './logger';
+import { Logger, LogLevel } from './logger';
 import { RunOptions } from './options';
 import { Request, PlyRequest } from './request';
 import { Runtime } from './runtime';
@@ -62,7 +62,11 @@ export class PlyStep implements Step, PlyTest {
                 this.padActualStart(this.subflow.id);
             }
             else if (this.step.path === 'stop' && !this.subflow) {
-                this.logger.info('Finished flow', this.flowPath);
+                let name = this.flowPath;
+                const lastSlash = name.lastIndexOf('/');
+                if (lastSlash > 0 && lastSlash < name.length - 1) name = name.substring(lastSlash + 1);
+                const runId = this.logger.level === LogLevel.debug ? ` (${this.instance.flowInstanceId})` : '';
+                this.logger.info(`Finished flow: ${name}${runId}`);
             } else if (this.step.path === 'request') {
                 let url = this.step.attributes?.url;
                 if (!url) throw new Error('Missing attribute: url');

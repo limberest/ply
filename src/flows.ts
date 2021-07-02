@@ -53,14 +53,14 @@ export class FlowSuite extends Suite<Step> {
         this.emitSuiteStarted();
 
         // runtime values are a deep copy of passed values
-        this.runtime.values = JSON.parse(JSON.stringify(values));
+        const runValues = JSON.parse(JSON.stringify(values));
         this.runtime.responseHeaders = undefined;
 
         let results: Result[];
         if (this.isFlowSpec(steps)) {
-            results = [await this.runFlow(runOptions)];
+            results = [await this.runFlow(runValues, runOptions)];
         } else {
-            results = await this.runSteps(steps, runOptions);
+            results = await this.runSteps(steps, runValues, runOptions);
         }
 
         this.emitSuiteFinished();
@@ -74,7 +74,7 @@ export class FlowSuite extends Suite<Step> {
         return step;
     }
 
-    async runFlow(runOptions?: RunOptions): Promise<Result> {
+    async runFlow(values: object, runOptions?: RunOptions): Promise<Result> {
         this.plyFlow.onFlow(flowEvent => {
             if (flowEvent.eventType === 'exec') {
                 // emit test event (not for request -- emitted in requestSuite)
@@ -106,22 +106,22 @@ export class FlowSuite extends Suite<Step> {
             }
         });
         this.plyFlow.requestSuite.emitter = this.emitter;
-        return await this.plyFlow.run(this.runtime, runOptions);
+        return await this.plyFlow.run(this.runtime, values, runOptions);
     }
 
-    async runSteps(steps: Step[], runOptions?: RunOptions): Promise<Result[]> {
+    async runSteps(steps: Step[], values: object, runOptions?: RunOptions): Promise<Result[]> {
 
         // flow-configured values
         if (this.plyFlow.flow.attributes?.values) {
             const rows = JSON.parse(this.plyFlow.flow.attributes?.values);
             for (const row of rows) {
-                (this.runtime.values as any)[row[0]] = row[1];
+                (values as any)[row[0]] = row[1];
             }
         }
 
         // run values override even flow-configured vals
         if (runOptions?.values) {
-            this.runtime.values = { ...this.runtime.values, ...runOptions.values };
+            values = { ...values, ...runOptions.values };
         }
 
         const requestSuite = new Suite<Request>(
@@ -158,7 +158,7 @@ export class FlowSuite extends Suite<Step> {
             }
             const plyStep = new PlyStep(step.step, requestSuite, this.logger, this.plyFlow.flow.path, '', subflow);
             this.emitter?.emit('flow', this.plyFlow.flowEvent('start', 'step', plyStep.instance));
-            const result = await plyStep.run(this.runtime, runOptions);
+            const result = await plyStep.run(this.runtime, values, runOptions);
             if (result.status === 'Failed' || result.status === 'Errored') {
                 this.emitter?.emit('flow', this.plyFlow.flowEvent('error', 'step', plyStep.instance));
             } else {

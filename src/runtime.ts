@@ -15,7 +15,6 @@ export class Runtime {
     testsLocation: Location;
 
     decoratedSuite?: DecoratedSuite;
-    values: object = {};
     /**
      * Verified response header names.
      */

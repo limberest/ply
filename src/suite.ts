@@ -127,7 +127,7 @@ export class Suite<T extends Test> {
     }
 
     /**
-     * Tests within a suite are run sequentially.
+     * Tests within a suite are always run sequentially.
      * @param tests
      */
     async runTests(tests: T[], values: object, runOptions?: RunOptions): Promise<Result[]> {
@@ -141,7 +141,7 @@ export class Suite<T extends Test> {
         }
 
         // runtime values are a deep copy of passed values
-        this.runtime.values = JSON.parse(JSON.stringify(values));
+        const runValues = this.callingFlowPath ? values : JSON.parse(JSON.stringify(values));
         this.runtime.responseHeaders = undefined;
 
         let callingCaseInfo: CallingCaseInfo | undefined;
@@ -209,7 +209,7 @@ export class Suite<T extends Test> {
                 if (test.type === 'request') {
                     this.runtime.responseHeaders = await this.getExpectedResponseHeaders(test.name, callingCaseInfo?.caseName);
                 }
-                result = await (test as unknown as PlyTest).run(this.runtime, runOptions);
+                result = await (test as unknown as PlyTest).run(this.runtime, runValues, runOptions);
                 let actualYaml: yaml.Yaml;
                 if (test.type === 'request') {
                     const plyResult = result as PlyResult;
@@ -239,12 +239,12 @@ export class Suite<T extends Test> {
                             }
                             const verifier = new Verifier(test.name, expectedYaml, this.logger);
                             this.log.debug(`Comparing ${this.runtime.results.expected.location} vs ${this.runtime.results.actual.location}`);
-                            const outcome = { ...verifier.verify(actualYaml, this.runtime.values), start };
+                            const outcome = { ...verifier.verify(actualYaml, runValues), start };
                             result = { ...result as Result, ...outcome };
                             this.logOutcome(test, outcome);
                         }
                     }
-                    this.addResult(results, result);
+                    this.addResult(results, result, runValues);
                 } else {
                     // case or flow complete -- verify result
                     actualYaml = this.runtime.results.getActualYaml(test.name);
@@ -262,11 +262,11 @@ export class Suite<T extends Test> {
                         // This allows us to accumulate programmatic values changes like those in updateRating() in movieCrud.ply.ts
                         // so that they can be accessed when verifying here, even though the changes are not present the passed 'values' parameter.
                         // TODO: Revisit when implementing a comprehensive values specification mechanism.
-                        const outcome = { ...verifier.verify(actualYaml, this.runtime.values), start };
+                        const outcome = { ...verifier.verify(actualYaml, runValues), start };
                         result = { ...result as Result, ...outcome };
                         this.logOutcome(test, outcome);
                     }
-                    this.addResult(results, result);
+                    this.addResult(results, result, runValues);
                 }
             } catch (err) {
                 this.logger.error(err.message, err);
@@ -276,7 +276,7 @@ export class Suite<T extends Test> {
                     message: err.message,
                     start
                 };
-                this.addResult(results, result);
+                this.addResult(results, result, runValues);
                 this.logOutcome(test, result);
             }
 
@@ -335,7 +335,7 @@ export class Suite<T extends Test> {
      * @param results
      * @param result
      */
-    private addResult(results: Result[], result: Result) {
+    private addResult(results: Result[], result: Result, runValues: any) {
         let plyResult;
         if (result instanceof PlyResult) {
             plyResult = result as PlyResult;
@@ -347,10 +347,10 @@ export class Suite<T extends Test> {
         if (plyResult) {
             result = plyResult.getResult(this.runtime.options);
         }
-        let resultsVal = (this.runtime.values as any)[RESULTS];
+        let resultsVal = runValues[RESULTS];
         if (!resultsVal) {
             resultsVal = {};
-            (this.runtime.values as any)[RESULTS] = resultsVal;
+            runValues[RESULTS] = resultsVal;
         }
         resultsVal[result.name] = result;
         results.push(result);

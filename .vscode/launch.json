@@ -10,7 +10,6 @@
       ],
       "program": "${workspaceFolder}/dist/cli.js",
       "args": [
-        "--create",
         "test/ply/flows/movie-queries.ply.flow"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json"
